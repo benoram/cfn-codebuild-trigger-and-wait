@@ -16,7 +16,7 @@ phases:
   build:
     commands:
       - cd src
-      - dotnet lambda publish          
+      - dotnet lambda package          
   
   post_build:
     commands:
