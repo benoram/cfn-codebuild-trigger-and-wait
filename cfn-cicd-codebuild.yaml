@@ -1,0 +1,96 @@
+AWSTemplateFormatVersion: "2010-09-09"
+  
+Description: Deploy CloudFormation Custom Resource to start and wait for CodeBuild builds
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: GitHub
+        Parameters:
+          - GitHubCloneUrl
+          - GitHubBranch          
+      - Label:
+          default: Content
+        Parameters:            
+          - CFNBucket
+          - CFNBucketPath
+    ParameterLabels:
+      GitHubCloneUrl:
+        default: 'GitHub Clone Url'
+      GitHubBranch:
+        default: 'GitHub Repository Branch'
+      CFNBucket:
+        default: 'CloudFormation Bucket'
+      CFNBucketPath:
+        default: 'Path'
+
+Parameters:
+  GitHubBranch:
+    Type: String
+    Default: master
+
+  GitHubCloneUrl:
+    Type: String
+    Default: https://github.com/oramco/cfn-codebuild-tigger-and-wait.git
+  
+  CFNBucket:
+    Type: String
+    Default: oramco-cfn
+
+  CFNBucketPath:
+    Type: String
+    Default: custom-resource/codebuild/build-and-wait
+
+Resources: 
+      
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: codebuild.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+  CodeBuild:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      BadgeEnabled: true
+      Description: Build for codebuild custom resource; https://github.com/oramco/cfn-codebuild-tigger-and-wait
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: "aws/codebuild/standard:4.0" 
+        Type: LINUX_CONTAINER
+        EnvironmentVariables:
+        - Name: BUCKET_NAME
+          Value: !Ref CFNBucket
+        - Name: BUCKET_PATH
+          Value: !Ref CFNBucketPath
+      LogsConfig: 
+        CloudWatchLogs:
+          GroupName: Build
+          Status: ENABLED
+          StreamName: codebuild-trigger-and-wait
+      Name: !Sub '${AWS::StackName}-CFNAutoDeploy'
+      ServiceRole: !Ref CodeBuildRole
+      Source:
+        Type: GITHUB
+        Auth:
+          Type: OAUTH
+        Location: !Ref GitHubCloneUrl
+        ReportBuildStatus: true
+      SourceVersion: !Ref GitHubBranch
+      TimeoutInMinutes: 10
+      Triggers:
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+        Webhook: true
+  

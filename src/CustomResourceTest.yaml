@@ -1,0 +1,55 @@
+﻿AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  CodeBuildProjectName:
+    Description: Name of CodeBuild project to run
+    Type: String
+
+Resources:  
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        {
+          "Version": "2012-10-17",
+          "Statement": [{
+              "Effect": "Allow",
+              "Principal": {"Service": ["lambda.amazonaws.com"]},
+              "Action": ["sts:AssumeRole"]
+          }]
+        }
+      Path:
+        "/"
+      Policies:
+        - {
+          "PolicyName": "root",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+                "Effect": "Allow",
+                "Action": ["logs:CreateLogGroup","logs:CreateLogStream","logs:PutLogEvents"],
+                "Resource": "arn:aws:logs:*:*:*"
+            },
+            {
+                "Effect": "Allow",
+                "Action": ["codebuild:StartBuild", "codebuild:GetBatch*"],
+                "Resource": "arn:aws:codebuild:*:*:*"
+            }
+            ]
+          }
+        }
+  CustomResourceLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: oramco-cfn
+        S3Key: custom-resource/codebuild/build-and-wait/src.zip
+      Handler: CustomResource.CodeBuild::OramCo.CloudFormation.CustomResource.CodeBuild.BuildAndWait::Execute
+      Runtime: "dotnetcore2.1"
+      Timeout: 600
+      Role: !GetAtt LambdaExecutionRole.Arn
+
+  CustomResource:
+    Type: "Custom::MyCustomResource"
+    Properties:
+      ServiceToken: !GetAtt CustomResourceLambdaFunction.Arn
+      CodeBuildProjectName: !Ref CodeBuildProjectName      
