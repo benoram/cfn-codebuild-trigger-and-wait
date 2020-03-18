@@ -40,7 +40,7 @@ Parameters:
 
   CFNBucketPath:
     Type: String
-    Default: cfn/custom-resource/codebuild/build-and-wait
+    Default: custom-resource/codebuild/build-and-wait
 
 Resources: 
       
