@@ -14,6 +14,7 @@ Metadata:
           default: Content
         Parameters:            
           - CFNBucket
+          - CFNBucketPath
     ParameterLabels:
       GitHubCloneUrl:
         default: 'GitHub Clone Url'
@@ -21,6 +22,8 @@ Metadata:
         default: 'GitHub Repository Branch'
       CFNBucket:
         default: 'CloudFormation Bucket'
+      CFNBucketPath:
+        default: 'Path'
 
 Parameters:
   GitHubBranch:
@@ -33,6 +36,11 @@ Parameters:
   
   CFNBucket:
     Type: String
+    Default: oramco-cfn
+
+  CFNBucketPath:
+    Type: String
+    Default: cfn/custom-resource/codebuild/build-and-wait
 
 Resources: 
       
@@ -63,6 +71,8 @@ Resources:
         EnvironmentVariables:
         - Name: BUCKET_NAME
           Value: !Ref CFNBucket
+        - Name: BUCKET_PATH
+          Value: !Ref CFNBucketPath
       LogsConfig: 
         CloudWatchLogs:
           GroupName: Build
