@@ -20,7 +20,7 @@ phases:
   
   post_build:
     commands:
-      - aws s3 sync .bin/Release/netcoreapp2.1/. "s3://${BUCKET_NAME}/${BUCKET_PATH}" --delete --sse AES256 
+      - aws s3 sync ./bin/Release/netcoreapp2.1/. "s3://${BUCKET_NAME}/${BUCKET_PATH}" --delete --sse AES256 
 
 artifacts:
   base-directory: 'src/bin/Release/netcoreapp2.1/'
