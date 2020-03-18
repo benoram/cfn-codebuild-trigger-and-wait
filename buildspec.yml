@@ -1,0 +1,22 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      dotnet: 3.1
+    commands:
+      - dotnet tool install -g Amazon.Lambda.Tools
+
+  build:
+    commands:
+      cd src
+      dotnet lambda publish          
+  
+  post_build:
+    commands:
+      - aws s3 sync ./bin/Release/netcoreapp2.1/. "s3://${BUCKET_NAME}/${BUCKET_PATH}" --delete --sse AES256 
+
+artifacts:
+  base-directory: 'src/bin/Release/netcoreapp2.1/'
+  files:
+    - 'src.zip'      

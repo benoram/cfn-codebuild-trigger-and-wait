@@ -1,0 +1,59 @@
+﻿AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  S3Bucket:
+    Description: "Name of the S3 Bucket where your Lambda code is stored"
+    Type: String
+    Default: artifacts-us-east-1-256595579711
+  S3Key:
+    Description: "The zip file your Lambda code is stored in"
+    Type: String
+    Default: cfn/custom-resource/src.zip
+ 
+Resources:
+  CustomResource:
+    Type: "Custom::MyCustomResource"
+    Properties:
+      ServiceToken: !GetAtt CustomResourceLambdaFunction.Arn
+      CodeBuildProjectName: PrivateResourcesCodeBuild-5UOWetdeJDp8
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        {
+          "Version": "2012-10-17",
+          "Statement": [{
+              "Effect": "Allow",
+              "Principal": {"Service": ["lambda.amazonaws.com"]},
+              "Action": ["sts:AssumeRole"]
+          }]
+        }
+      Path:
+        "/"
+      Policies:
+        - {
+          "PolicyName": "root",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+                "Effect": "Allow",
+                "Action": ["logs:CreateLogGroup","logs:CreateLogStream","logs:PutLogEvents"],
+                "Resource": "arn:aws:logs:*:*:*"
+            },
+            {
+                "Effect": "Allow",
+                "Action": ["codebuild:StartBuild", "codebuild:GetBatch*"],
+                "Resource": "arn:aws:codebuild:*:*:*"
+            }
+            ]
+          }
+        }
+  CustomResourceLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: !Ref S3Bucket
+        S3Key: !Ref S3Key
+      Handler: CustomResource.CodeBuild::OramCo.CloudFormation.CustomResource.CodeBuild.BuildAndWait::Execute
+      Runtime: "dotnetcore2.1"
+      Timeout: 600
+      Role: !GetAtt LambdaExecutionRole.Arn
