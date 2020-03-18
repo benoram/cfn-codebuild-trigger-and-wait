@@ -9,34 +9,34 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        {
-          "Version": "2012-10-17",
-          "Statement": [{
-              "Effect": "Allow",
-              "Principal": {"Service": ["lambda.amazonaws.com"]},
-              "Action": ["sts:AssumeRole"]
-          }]
-        }
-      Path:
-        "/"
+        Version: 2012-10-17
+        Statement:
+          - 
+            Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      Path: "/"
       Policies:
-        - {
-          "PolicyName": "root",
-          "PolicyDocument": {
-            "Version": "2012-10-17",
-            "Statement": [{
-                "Effect": "Allow",
-                "Action": ["logs:CreateLogGroup","logs:CreateLogStream","logs:PutLogEvents"],
-                "Resource": "arn:aws:logs:*:*:*"
-            },
-            {
-                "Effect": "Allow",
-                "Action": ["codebuild:StartBuild", "codebuild:GetBatch*"],
-                "Resource": "arn:aws:codebuild:*:*:*"
-            }
-            ]
-          }
-        }
+        - 
+          PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Resource: arn:aws:logs:*:*:*
+                Action: 
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+              - Effect: Allow
+                Resource: arn:aws:codebuild:*:*:*
+                Action:
+                  - codebuild:StartBuild
+                  - codebuild:GetBatch*
+
   CustomResourceLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
@@ -44,7 +44,7 @@ Resources:
         S3Bucket: oramco-cfn
         S3Key: custom-resource/codebuild/build-and-wait/src.zip
       Handler: CustomResource.CodeBuild::OramCo.CloudFormation.CustomResource.CodeBuild.BuildAndWait::Execute
-      Runtime: "dotnetcore2.1"
+      Runtime: dotnetcore2.1
       Timeout: 600
       Role: !GetAtt LambdaExecutionRole.Arn
 

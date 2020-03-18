@@ -40,7 +40,7 @@ Parameters:
 
   CFNBucketPath:
     Type: String
-    Default: custom-resource/codebuild/build-and-wait
+    Default: custom-resource/codebuild/trigger-and-wait
 
 Resources: 
       
@@ -55,7 +55,8 @@ Resources:
             Service: codebuild.amazonaws.com
           Action: sts:AssumeRole
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AdministratorAccess
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
 
   CodeBuild:
     Type: AWS::CodeBuild::Project
