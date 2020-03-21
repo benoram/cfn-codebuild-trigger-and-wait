@@ -42,7 +42,7 @@ Resources:
     Properties:
       Code:
         S3Bucket: oramco-cfn
-        S3Key: custom-resource/codebuild/build-and-wait/src.zip
+        S3Key: oramco/cfn-codebuild-trigger-and-wait/src.zip
       Handler: CustomResource.CodeBuild::OramCo.CloudFormation.CustomResource.CodeBuild.BuildAndWait::Execute
       Runtime: dotnetcore2.1
       Timeout: 600
